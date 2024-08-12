@@ -1,0 +1,5 @@
+# Ignore node_modules, since it's recreated by writing npm install
+node_modules
+
+# Ignore meaningless MacOS files
+.DS_Store
