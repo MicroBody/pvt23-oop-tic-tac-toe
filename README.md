@@ -7,5 +7,3 @@ npm install
 Kör från terminalen:
 
 node index
-
-
