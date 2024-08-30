@@ -5,10 +5,14 @@ import Player from './Player.js';
 export default class App {
 
   constructor() {
+    this.board = new Board();
+    this.start();
+  }
+
+  start() {
     // a while-loop that let us play the game repeatedly
     while (true) {
       this.createPlayers();
-      this.board = new Board();
       this.startGameLoop();
       this.whoHasWonOnGameOver();
       // ask if we should play again
