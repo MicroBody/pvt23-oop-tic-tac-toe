@@ -58,16 +58,16 @@ export default class App {
       ${this.board.render()}
       <div class="buttons">
         ${!this.board.gameOver ?
-        this.renderAbortButton() :
+        this.renderQuitButton() :
         this.renderPlayAgainButtons()}
       </div>
     `;
   }
 
-  renderAbortButton() {
+  renderQuitButton() {
     if (!this.namesEntered) { return ''; }
 
-    globalThis.abortGame = async () => {
+    globalThis.quitGame = async () => {
       let answer = await this.dialog.ask(
         'What do you want to do?',
         ['Continue the game', 'Play again', 'Enter new players']
@@ -77,8 +77,8 @@ export default class App {
     };
 
     return /*html*/`
-      <div class="button" onclick="abortGame()">
-        Abort the game
+      <div class="button" onclick="quitGame()">
+        Quit this game
       </div>
     `
   }
