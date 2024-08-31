@@ -18,9 +18,16 @@ export default class App {
   }
 
   async askForNames() {
-    let playerXName = await this.dialog.ask('Enter the name of player X:');
-    await sleep(500);
-    let playerOName = await this.dialog.ask('Enter the name of player O:');
+    const okName = name => name.match(/[a-zåäöA-ZÅÄÖ]{2,}/);
+    let playerXName = '', playerOName = '';
+    while (!okName(playerXName)) {
+      playerXName = await this.dialog.ask('Enter the name of player X:');
+      await sleep(500);
+    }
+    while (!okName(playerOName)) {
+      playerOName = await this.dialog.ask('Enter the name of player O:');
+      await sleep(500);
+    }
     this.playerX = new Player(playerXName, 'X');
     this.playerO = new Player(playerOName, 'O');
     this.namesEntered = true;
@@ -49,9 +56,11 @@ export default class App {
         ${!this.board.winner ? '' : `<p>${color}: ${name} won!</p>`}
       `}
       ${this.board.render()}
-      ${!this.board.gameOver ?
+      <div class="buttons">
+        ${!this.board.gameOver ?
         this.renderAbortButton() :
         this.renderPlayAgainButtons()}
+      </div>
     `;
   }
 
@@ -68,11 +77,10 @@ export default class App {
     };
 
     return /*html*/`
-      <div class="buttons">
-        <div class="button" onclick="abortGame()">
-          Abort the game
-        </div>
-      </div>`;
+      <div class="button" onclick="abortGame()">
+        Abort the game
+      </div>
+    `
   }
 
   renderPlayAgainButtons() {
@@ -89,10 +97,8 @@ export default class App {
     // why not use the button element? 
     // div tags are easier to style in a cross-browser-compatible way
     return /*html*/`
-      <div class="buttons">
-        <div class="button" href="#" onclick="playAgain()">Play again</div>
-        <div class="button" href="#" onclick="newPlayers()">New players</div>
-      </div>
+      <div class="button" href="#" onclick="playAgain()">Play again</div>
+      <div class="button" href="#" onclick="newPlayers()">New players</div>
     `;
   }
 
