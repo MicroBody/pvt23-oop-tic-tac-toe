@@ -11,6 +11,7 @@ export default class Board {
     this.winner = false;
     this.isADraw = false;
     this.gameOver = false;
+    this.winningCombo = [];
   }
 
   render() {
@@ -25,14 +26,16 @@ export default class Board {
     // so we can apply different styling depending on them
     document.body.setAttribute('currentPlayerColor',
       this.gameOver ? '' : this.currentPlayerColor);
-    document.body.setAttribute('gameOver', this.gameOver);
+    document.body.setAttribute('gameInProgress',
+      this.app.namesEntered && !this.gameOver);
 
     // render the board as html
     return /*html*/`<div class="board">
       ${this.matrix.map((row, rowIndex) =>
       row.map((cell, columnIndex) =>/*html*/`
         <div
-          class="cell ${cell}"
+          class="cell ${cell} ${this.winningCombo
+          .includes('row' + rowIndex + 'column' + columnIndex) ? 'in-win' : ''}"
           onclick="makeMoveOnClick(${rowIndex},${columnIndex})">
         </div>
       `).join('')).join('')}
@@ -62,7 +65,7 @@ export default class Board {
     this.isADraw = this.drawCheck();
     // the game is over if someone has won or if it's a draw
     this.gameOver = this.winner || this.isADraw;
-    // change the current player color if the game is not over
+    // change the current player color, if the game is not over
     !this.gameOver
       && (this.currentPlayerColor = this.currentPlayerColor === 'X' ? 'O' : 'X');
     // return true if the move could be made
@@ -88,11 +91,13 @@ export default class Board {
         for (let c = 0; c < m[0].length; c++) {
           // ro = row offset, co = column offset
           for (let winType of offsets) {
-            let colorsInCombo = '';
+            let colorsInCombo = '', combo = [];
             for (let [ro, co] of winType) {
               colorsInCombo += (m[r + ro] || [])[c + co];
+              combo.push('row' + (r + ro) + 'column' + (c + co));
             }
             if (colorsInCombo === color.repeat(3)) {
+              this.winningCombo = combo; // remember the winning combo
               return color;
             }
           }

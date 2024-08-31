@@ -1,11 +1,12 @@
-import Prompt from './Prompt.js';
+import Dialog from './Dialog.js';
 import Board from './Board.js';
 import Player from './Player.js';
+import sleep from './helpers/sleep.js';
 
 export default class App {
 
   constructor(playerX, playerO) {
-    this.prompt = new Prompt();
+    this.dialog = new Dialog();
     this.board = new Board(this);
     if (playerX && playerO) {
       this.playerX = playerX;
@@ -17,12 +18,20 @@ export default class App {
   }
 
   async askForNames() {
-    let playerXName = await this.prompt.ask('Enter a name for player X:');
-    let playerOName = await this.prompt.ask('Enter a name for player O:');
+    let playerXName = await this.dialog.ask('Enter the name of player X:');
+    await sleep(500);
+    let playerOName = await this.dialog.ask('Enter the name of player O:');
     this.playerX = new Player(playerXName, 'X');
     this.playerO = new Player(playerOName, 'O');
     this.namesEntered = true;
     this.render();
+  }
+
+  namePossesive(name) {
+    // although not necessary, it's nice with a traditional
+    // possesive form of the name when it ends with an "s":
+    // i.e. "Thomas'" rather than "Thomas's" but "Anna's" :)
+    return name + (name.slice(-1) !== 's' ? `'s` : `'`)
   }
 
   render() {
@@ -36,19 +45,41 @@ export default class App {
         `<p>${color}: ${this.namePossesive(name)} turn...</p>`
         : (this.namesEntered ? '' : '<p>Enter names</p>')}
       ${!this.board.gameOver ? '' : /*html*/`
-        ${!this.board.isADraw ? '' : `<p>It's a tie.</p>`}
-        ${!this.board.winner ? '' : `<p>${name} (${color}) won!</p>`}
+        ${!this.board.isADraw ? '' : `<p>It's a tie...</p>`}
+        ${!this.board.winner ? '' : `<p>${color}: ${name} won!</p>`}
       `}
       ${this.board.render()}
-      ${!this.board.gameOver ? '' : this.renderPlayAgainButtons()}
+      ${!this.board.gameOver ?
+        this.renderAbortButton() :
+        this.renderPlayAgainButtons()}
     `;
   }
 
+  renderAbortButton() {
+    if (!this.namesEntered) { return ''; }
+
+    globalThis.abortGame = async () => {
+      let answer = await this.dialog.ask(
+        'What do you want to do?',
+        ['Continue the game', 'Play again', 'Enter new players']
+      );
+      answer === 'Play again' && new App(this.playerO, this.playerX);
+      answer === 'Enter new players' && new App();
+    };
+
+    return /*html*/`
+      <div class="buttons">
+        <div class="button" onclick="abortGame()">
+          Abort the game
+        </div>
+      </div>`;
+  }
+
   renderPlayAgainButtons() {
-    // switch who begins if same players
+    // switch who begins if the same players
     globalThis.playAgain = async () => {
-      await this.prompt.ask(
-        `${this.namePossesive(this.playerO.name)} turn to start!`, true);
+      await this.dialog.ask(
+        `It's ${this.namePossesive(this.playerO.name)} turn to start!`, ['OK']);
       new App(this.playerO, this.playerX);
     }
 
@@ -58,18 +89,11 @@ export default class App {
     // why not use the button element? 
     // div tags are easier to style in a cross-browser-compatible way
     return /*html*/`
-      <div class="play-again-buttons">
+      <div class="buttons">
         <div class="button" href="#" onclick="playAgain()">Play again</div>
         <div class="button" href="#" onclick="newPlayers()">New players</div>
       </div>
     `;
-  }
-
-  namePossesive(name) {
-    // although not necessary, it's nice with a traditional
-    // possesive form of the name when it ends with an "s":
-    // i.e. "Thomas'" rather than "Thomas's" but "Anna's" :)
-    return name + (name.slice(-1) !== 's' ? `'s` : `'`)
   }
 
 }

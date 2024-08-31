@@ -1,4 +1,4 @@
-/* css generated with https: //www.bestcssbuttongenerator.com */
+/*  https://www.bestcssbuttongenerator.com helped generate this css */
 
 .button {
   box-shadow: 0px 0px 0px 2px #9fb4f2;
@@ -9,18 +9,18 @@
   display: inline-block;
   cursor: pointer;
   color: #ffffff;
-  font-family: 'Rock Salt';
-  font-size: 19px;
-  padding: 12px 37px;
+  font-family: 'Bebas Neue';
+  font-size: max(2vw, 3vh);
+  padding: max(0.5vw, 1.5vh);
   text-shadow: 0px 1px 0px #283966;
-}
 
-.button:hover {
-  background: linear-gradient(to bottom, #476e9e 5%, #7892c2 100%);
-  background-color: #476e9e;
-}
+  &:hover {
+    background-color: #476e9e;
+    background: linear-gradient(to bottom, #476e9e 5%, #7892c2 100%);
+  }
 
-.button:active {
-  position: relative;
-  top: 1px;
+  &:active {
+    position: relative;
+    top: 1px;
+  }
 }

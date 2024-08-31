@@ -1,13 +1,31 @@
-/* box-sizing (inlcude padding and borders in widths and heights */
-*,
-*:before,
-*:after {
-  box-sizing: border-box;
+@import 'button.css';
+
+h1 {
+  font-family: 'Rock Salt';
+  font-size: max(2vw, 3vh);
+  text-align: center;
+  margin-top: 0;
+  margin-bottom: min(-1vw, -1.5vh);
 }
 
-body {
-  margin: 0;
-  background-color: rgb(0, 0, 0);
-  color: rgb(255, 255, 255);
-  font-family: 'Roboto';
+p {
+  font-family: 'Bebas Neue';
+  font-size: max(2vw, 3vh);
+  text-align: center;
+  margin-bottom: -1vw;
+}
+
+.buttons {
+  height: 56px;
+  margin-top: max(3vw, 5vh);
+  text-align: center;
+}
+
+.buttons .button:not(.button:nth-child(1)) {
+  margin-left: 40px;
+}
+
+/* hide all buttons except the ones in the dialog if the dialog is open*/
+body[dialogOpen="true"] .buttons:not(dialog .buttons) * {
+  display: none;
 }
