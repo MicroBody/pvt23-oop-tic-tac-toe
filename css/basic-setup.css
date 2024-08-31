@@ -11,6 +11,8 @@ body {
   color: rgb(255, 255, 255);
   font-family: 'Bebas Neue';
   background-image: url(/images/table-top.jpg);
+  background-attachment: fixed;
+  background-size: cover;
   display: flex;
   height: 100vh;
 }

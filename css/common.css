@@ -4,7 +4,7 @@ h1 {
   font-family: 'Rock Salt';
   font-size: max(2vw, 3vh);
   text-align: center;
-  margin-top: 0;
+  margin-top: -2vh;
   margin-bottom: min(-1vw, -1.5vh);
 }
 
