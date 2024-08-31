@@ -1,16 +1,7 @@
 export default class Board {
 
-  constructor() {
-    // A simple way of generating the board
-    // - but no so flexible
-    /*this.matrix = [
-        [' ', ' ', ' '],
-        [' ', ' ', ' '],
-        [' ', ' ', ' ']
-    ];*/
-    // A slighly more complex way of generating the board
-    // - more flexible since we can change
-    // how many rows and columns easily
+  constructor(app) {
+    this.app = app;
     this.matrix = [...new Array(3)].map(row =>
       [...new Array(3)].map(column => ' ')
     );
@@ -22,20 +13,30 @@ export default class Board {
     this.gameOver = false;
   }
 
-  // render = output/draw something
   render() {
-    // A basic way of showing the board
-    // console.table(this.matrix);
-    // A more customized board with our own 
-    // characters forrow and column separation
-    let line = '\n' + '-'.repeat(13) + '\n';
-    console.log(
-      line +
-      this.matrix.map(row =>
-        row.map(column => `| ${column} `).join('')
-        + '|').join(line) +
-      line
-    );
+    // create the event handler called on click:
+    // makeMove and if makeMove returns true
+    // then call the app render method
+    globalThis.makeMoveOnClick = (row, column) =>
+      this.makeMove(this.currentPlayerColor, row, column)
+      && this.app.render();
+
+    // set some statuses as attributes to the body
+    // so we can apply different styling depending on them
+    document.body.setAttribute('currentPlayerColor',
+      this.gameOver ? '' : this.currentPlayerColor);
+    document.body.setAttribute('gameOver', this.gameOver);
+
+    // render the board as html
+    return /*html*/`<div class="board">
+      ${this.matrix.map((row, rowIndex) =>
+      row.map((cell, columnIndex) =>/*html*/`
+        <div
+          class="cell ${cell}"
+          onclick="makeMoveOnClick(${rowIndex},${columnIndex})">
+        </div>
+      `).join('')).join('')}
+    </div>`;
   }
 
   makeMove(color, row, column) {
@@ -56,13 +57,14 @@ export default class Board {
 
     // make the move
     this.matrix[row][column] = color;
-    // change the current player color
-    this.currentPlayerColor = this.currentPlayerColor === 'X' ? 'O' : 'X';
     // check if someone has won or if it's a draw/tie and update properties
     this.winner = this.winCheck();
     this.isADraw = this.drawCheck();
     // the game is over if someone has won or if it's a draw
     this.gameOver = this.winner || this.isADraw;
+    // change the current player color if the game is not over
+    !this.gameOver
+      && (this.currentPlayerColor = this.currentPlayerColor === 'X' ? 'O' : 'X');
     // return true if the move could be made
     return true;
   }

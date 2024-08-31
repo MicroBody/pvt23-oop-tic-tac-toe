@@ -1,62 +1,75 @@
-import prompt from '../helpers/prompt.js';
+import Prompt from './Prompt.js';
 import Board from './Board.js';
 import Player from './Player.js';
 
 export default class App {
 
-  constructor() {
-    this.board = new Board();
-    this.start();
+  constructor(playerX, playerO) {
+    this.prompt = new Prompt();
+    this.board = new Board(this);
+    if (playerX && playerO) {
+      this.playerX = playerX;
+      this.playerO = playerO;
+      this.namesEntered = true;
+    }
+    else { this.askForNames(); }
+    this.render();
   }
 
-  start() {
-    // a while-loop that let us play the game repeatedly
-    while (true) {
-      this.createPlayers();
-      this.startGameLoop();
-      this.whoHasWonOnGameOver();
-      // ask if we should play again
-      console.log('');
-      let playAgain = prompt('Vill ni spela igen? (ja/nej)? ');
-      if (playAgain !== 'ja') { break; }
-    }
+  async askForNames() {
+    let playerXName = await this.prompt.ask('Enter a name for player X:');
+    let playerOName = await this.prompt.ask('Enter a name for player O:');
+    this.playerX = new Player(playerXName, 'X');
+    this.playerO = new Player(playerOName, 'O');
+    this.namesEntered = true;
+    this.render();
   }
 
-  createPlayers() {
-    console.clear();
-    console.log('TIC-TAC-TOE\n');
-    this.playerX = new Player(prompt('Spelare X:s namn: '), 'X');
-    this.playerO = new Player(prompt('Spelare O:s namn: '), 'O');
+  render() {
+    let color = this.board.currentPlayerColor;
+    let player = color === 'X' ? this.playerX : this.playerO;
+    let name = player?.name || '';
+
+    document.querySelector('main').innerHTML = /*html*/`
+      <h1>Tic-Tac-Toe</h1>
+      ${!this.board.gameOver && player ?
+        `<p>${color}: ${this.namePossesive(name)} turn...</p>`
+        : (this.namesEntered ? '' : '<p>Enter names</p>')}
+      ${!this.board.gameOver ? '' : /*html*/`
+        ${!this.board.isADraw ? '' : `<p>It's a tie.</p>`}
+        ${!this.board.winner ? '' : `<p>${name} (${color}) won!</p>`}
+      `}
+      ${this.board.render()}
+      ${!this.board.gameOver ? '' : this.renderPlayAgainButtons()}
+    `;
   }
 
-  startGameLoop() {
-    // game loop - runs until the game is over
-    while (!this.board.gameOver) {
-      console.clear();
-      this.board.render();
-      let player = this.board.currentPlayerColor === 'X'
-        ? this.playerX : this.playerO;
-      let move = prompt(
-        `Ange ditt drag ${player.color} ${player.name} - skriv in rad,kolumn: `
-      );
-      // convert row and columns to numbers and zero-based indexes
-      let [row, column] = move.split(',').map(x => +x.trim() - 1);
-      // try to make the move
-      this.board.makeMove(player.color, row, column);
+  renderPlayAgainButtons() {
+    // switch who begins if same players
+    globalThis.playAgain = async () => {
+      await this.prompt.ask(
+        `${this.namePossesive(this.playerO.name)} turn to start!`, true);
+      new App(this.playerO, this.playerX);
     }
+
+    // start a-fresh with new players
+    globalThis.newPlayers = () => new App();
+
+    // why not use the button element? 
+    // div tags are easier to style in a cross-browser-compatible way
+    return /*html*/`
+      <div class="play-again-buttons">
+        <div class="button" href="#" onclick="playAgain()">Play again</div>
+        <div class="button" href="#" onclick="newPlayers()">New players</div>
+      </div>
+    `;
   }
 
-  whoHasWonOnGameOver() {
-    // the game is over, tell the player who has one or if we have a draw
-    console.clear();
-    this.board.render();
-    if (this.board.winner) {
-      let winningPlayer = this.board.winner === 'X' ? this.playerX : this.playerO;
-      console.log(`Grattis ${winningPlayer.color}: ${winningPlayer.name} du vann!`);
-    }
-    else {
-      console.log('Tyvärr det blev oavgjort...');
-    }
+  namePossesive(name) {
+    // although not necessary, it's nice with a traditional
+    // possesive form of the name when it ends with an "s":
+    // i.e. "Thomas'" rather than "Thomas's" but "Anna's" :)
+    return name + (name.slice(-1) !== 's' ? `'s` : `'`)
   }
 
 }

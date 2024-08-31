@@ -1,0 +1,76 @@
+.board {
+  aspect-ratio: 1/1;
+  margin: 0 auto;
+  width: min(62vh, 62vw);
+  margin-top: min(5vh, 5vw);
+  border-bottom: 2px solid #fff;
+  border-left: 2px solid #fff;
+  border-radius: 20px;
+}
+
+.cell {
+  aspect-ratio: 1/1;
+  position: relative;
+  float: left;
+  border-top: 2px solid rgb(255, 255, 255);
+  border-right: 2px solid rgb(255, 255, 255);
+  width: 33.33%;
+  font-family: 'Rock Salt';
+}
+
+.cell:nth-child(odd) {
+  background-color: rgb(25, 67, 158);
+}
+
+.cell:nth-child(even) {
+  background-color: rgb(179, 29, 29);
+}
+
+.cell:nth-child(1) {
+  border-top-left-radius: 20px;
+}
+
+.cell:nth-child(3) {
+  border-top-right-radius: 20px;
+}
+
+.cell:nth-child(7) {
+  border-bottom-left-radius: 20px;
+}
+
+.cell:nth-child(9) {
+  border-bottom-right-radius: 20px;
+}
+
+body[gameOver="false"] .cell:not(.X, .O) {
+  cursor: pointer;
+}
+
+.cell::before {
+  content: '';
+  width: 100%;
+  position: absolute;
+  color: white;
+  font-size: min(8.5vh, 8.5vw);
+  text-align: center;
+}
+
+.cell.X::before {
+  content: 'X';
+}
+
+.cell.O::before {
+  content: 'O';
+}
+
+/* pre-showing the correct piece on hover/mouse-over*/
+
+body[currentPlayerColor="X"] .cell:not(.X, .O):hover::before {
+  content: 'X';
+  opacity: 0.5;
+}
+
+body[currentPlayerColor="O"] .cell:not(.X, .O):hover::before {
+  content: 'O';
+  opacity: 0.5;
+}
