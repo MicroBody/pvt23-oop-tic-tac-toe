@@ -5,9 +5,12 @@ import sleep from './helpers/sleep.js';
 
 export default class App {
 
-  constructor(playerX, playerO) {
+  constructor(playerX, playerO, whoStarts = 'X') {
     this.dialog = new Dialog();
     this.board = new Board(this);
+    this.board.currentPlayerColor = whoStarts;
+    this.whoStarts = whoStarts;
+    this.setPlayAgainGlobals();
     if (playerX && playerO) {
       this.playerX = playerX;
       this.playerO = playerO;
@@ -17,19 +20,15 @@ export default class App {
     this.render();
   }
 
-  async askForNames() {
+  async askForNames(color = 'X') {
     const okName = name => name.match(/[a-zåäöA-ZÅÄÖ]{2,}/);
-    let playerXName = '', playerOName = '';
-    while (!okName(playerXName)) {
-      playerXName = await this.dialog.ask('Enter the name of player X:');
+    let playerName = '';
+    while (!okName(playerName)) {
+      playerName = await this.dialog.ask(`Enter the name of player ${color}:`);
       await sleep(500);
     }
-    while (!okName(playerOName)) {
-      playerOName = await this.dialog.ask('Enter the name of player O:');
-      await sleep(500);
-    }
-    this.playerX = new Player(playerXName, 'X');
-    this.playerO = new Player(playerOName, 'O');
+    this['player' + color] = new Player(playerName, color);
+    if (color === 'X') { this.askForNames('O'); return; }
     this.namesEntered = true;
     this.render();
   }
@@ -72,28 +71,31 @@ export default class App {
         'What do you want to do?',
         ['Continue the game', 'Play again', 'Enter new players']
       );
-      answer === 'Play again' && new App(this.playerO, this.playerX);
-      answer === 'Enter new players' && new App();
+      answer === 'Play again' && globalThis.playAgain();
+      answer === 'Enter new players' && globalThis.newPlayers();
     };
 
     return /*html*/`
       <div class="button" onclick="quitGame()">
         Quit this game
       </div>
-    `
+    `;
+  }
+
+
+  setPlayAgainGlobals() {
+    // play again 
+    globalThis.playAgain = async () => {
+      let playerToStart = this.whoStarts === 'X' ? this.playerO : this.playerX;
+      await this.dialog.ask(
+        `It's ${this.namePossesive(playerToStart.name)} turn to start!`, ['OK']);
+      new App(this.playerX, this.playerO, playerToStart.color);
+    }
+    // start a-fresh with new players
+    globalThis.newPlayers = () => new App();
   }
 
   renderPlayAgainButtons() {
-    // switch who begins if the same players
-    globalThis.playAgain = async () => {
-      await this.dialog.ask(
-        `It's ${this.namePossesive(this.playerO.name)} turn to start!`, ['OK']);
-      new App(this.playerO, this.playerX);
-    }
-
-    // start a-fresh with new players
-    globalThis.newPlayers = () => new App();
-
     // why not use the button element? 
     // div tags are easier to style in a cross-browser-compatible way
     return /*html*/`
