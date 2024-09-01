@@ -8,30 +8,46 @@ export default class App {
   constructor(playerX, playerO) {
     this.dialog = new Dialog();
     this.board = new Board(this);
+    // continue with same players
     if (playerX && playerO) {
+      // important - from the moment we have computer players
+      // reset colors and board in old player objects
+      playerX.color = 'X';
+      playerO.color = 'O';
+      playerX.board = this.board;
+      playerO.board = this.board;
       this.playerX = playerX;
       this.playerO = playerO;
       this.namesEntered = true;
     }
-    else { this.askForNames(); }
+    // start a-new with new players
+    else {
+      // a constructor can not be async
+      // but it can create an async function and call it
+      (async () => {
+        await this.askForPlayerNameAndType('X');
+        await sleep(500);
+        await this.askForPlayerNameAndType('O');
+        this.namesEntered = true;
+        this.render();
+      })();
+    }
     this.render();
   }
 
-  async askForNames() {
+  async askForPlayerNameAndType(color) {
     const okName = name => name.match(/[a-zåäöA-ZÅÄÖ]{2,}/);
-    let playerXName = '', playerOName = '';
-    while (!okName(playerXName)) {
-      playerXName = await this.dialog.ask('Enter the name of player X:');
+    let playerName = '';
+    while (!okName(playerName)) {
+      playerName = await this.dialog.ask(`Enter the name of player ${color}:`);
       await sleep(500);
     }
-    while (!okName(playerOName)) {
-      playerOName = await this.dialog.ask('Enter the name of player O:');
-      await sleep(500);
-    }
-    this.playerX = new Player(playerXName, 'X');
-    this.playerO = new Player(playerOName, 'O');
-    this.namesEntered = true;
-    this.render();
+    let playerType = await this.dialog.ask(
+      `What type of player is ${playerName}?`,
+      ['Human', 'Computer']
+    );
+    this['player' + color] =
+      new Player(playerName, color, playerType === 'Computer', this.board);
   }
 
   namePossesive(name) {
@@ -45,6 +61,10 @@ export default class App {
     let color = this.board.currentPlayerColor;
     let player = color === 'X' ? this.playerX : this.playerO;
     let name = player?.name || '';
+
+    // import - before render lock the board from input if 
+    // player (the player whose turn it is) is a computer
+    this.board.lockedFromInput = player?.isBot;
 
     document.querySelector('main').innerHTML = /*html*/`
       <h1>Tic-Tac-Toe</h1>
@@ -62,6 +82,8 @@ export default class App {
         this.renderPlayAgainButtons()}
       </div>
     `;
+    // if the player whose turn it is a bot, tell it to make its move
+    if (!this.board.gameOver && player?.isBot) { player.makeMove(); }
   }
 
   renderQuitButton() {

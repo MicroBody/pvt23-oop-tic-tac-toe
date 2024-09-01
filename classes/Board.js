@@ -1,5 +1,7 @@
 export default class Board {
 
+  #lockedFromInput = false;
+
   constructor(app) {
     this.app = app;
     this.matrix = [...new Array(3)].map(row =>
@@ -42,9 +44,11 @@ export default class Board {
     </div>`;
   }
 
-  makeMove(color, row, column) {
+  makeMove(color, row, column, computerMove = false) {
     // don't make any move if the game is over
     if (this.gameOver) { return false; }
+    // don't make any move if the board is locked from input and not a computer move
+    if (this.lockedFromInput && !computerMove) { return; }
     // check that the color is X or O - otherwise don't make the move
     if (color !== 'X' && color !== 'O') { return false; }
     // check that the color matches the player's turn - otherwise don't make the move
@@ -111,6 +115,15 @@ export default class Board {
   drawCheck() {
     // if no one has won and no empty positions then it's a draw
     return !this.winCheck() && !this.matrix.flat().includes(' ');
+  }
+
+  // getter and setter for lockedFromInput
+  // so we can add a html attribute to the body 
+  // in order to reflect the lock in our css
+  get lockedFromInput() { return this.#lockedFromInput };
+  set lockedFromInput(value) {
+    this.#lockedFromInput = value;
+    document.body.setAttribute('boardLockedFromInput', value);
   }
 
 }

@@ -77,7 +77,7 @@
 }
 
 /* show which cells that are clickable */
-body[gameInProgress="true"] {
+body[gameInProgress="true"]:not(body[boardLockedFromInput="true"]) {
 
   .cell:not(.X, .O) {
     cursor: pointer;
