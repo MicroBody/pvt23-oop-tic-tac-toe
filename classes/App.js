@@ -38,7 +38,7 @@ export default class App {
     // although not necessary, it's nice with a traditional
     // possesive form of the name when it ends with an "s":
     // i.e. "Thomas'" rather than "Thomas's" but "Anna's" :)
-    return name + (name.slice(-1) !== 's' ? `'s` : `'`)
+    return name + (name.slice(-1).toLowerCase() !== 's' ? `'s` : `'`)
   }
 
   render() {
