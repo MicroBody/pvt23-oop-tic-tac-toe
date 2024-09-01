@@ -14,30 +14,21 @@ export default class App {
     if (playerX && playerO) {
       this.playerX = playerX;
       this.playerO = playerO;
-      // set the new board for the 'old' players
-      this.playerX.board = this.board;
-      this.playerO.board = this.board;
-      // we now the players already :)
       this.namesEntered = true;
     }
-    else { this.askForPlayerNameAndType(); }
+    else { this.askForNames(); }
     this.render();
   }
 
-  async askForPlayerNameAndType(color = 'X') {
+  async askForNames(color = 'X') {
     const okName = name => name.match(/[a-zåäöA-ZÅÄÖ]{2,}/);
     let playerName = '';
     while (!okName(playerName)) {
       playerName = await this.dialog.ask(`Enter the name of player ${color}:`);
       await sleep(500);
     }
-    let playerType = await this.dialog.ask(
-      `What type of player is ${playerName}?`,
-      ['Human', 'Computer']
-    );
-    this['player' + color] =
-      new Player(playerName, color, playerType === 'Computer', this.board);
-    if (color === 'X') { this.askForPlayerNameAndType('O'); return; }
+    this['player' + color] = new Player(playerName, color);
+    if (color === 'X') { this.askForNames('O'); return; }
     this.namesEntered = true;
     this.render();
   }
@@ -53,10 +44,6 @@ export default class App {
     let color = this.board.currentPlayerColor;
     let player = color === 'X' ? this.playerX : this.playerO;
     let name = player?.name || '';
-
-    // import - before render lock the board from input if 
-    // player (the player whose turn it is) is a computer
-    this.board.lockedFromInput = player?.isBot;
 
     document.querySelector('main').innerHTML = /*html*/`
       <h1>Tic-Tac-Toe</h1>
@@ -74,8 +61,6 @@ export default class App {
         this.renderPlayAgainButtons()}
       </div>
     `;
-    // if the player whose turn it is a bot, tell it to make its move
-    if (!this.board.gameOver && player?.isBot) { player.makeMove(); }
   }
 
   renderQuitButton() {
@@ -86,15 +71,15 @@ export default class App {
         'What do you want to do?',
         ['Continue the game', 'Play again', 'Enter new players']
       );
-      answer === 'Play again' && new App(this.playerO, this.playerX);
-      answer === 'Enter new players' && new App();
+      answer === 'Play again' && globalThis.playAgain();
+      answer === 'Enter new players' && globalThis.newPlayers();
     };
 
     return /*html*/`
       <div class="button" onclick="quitGame()">
         Quit this game
       </div>
-    `
+    `;
   }
 
   setPlayAgainGlobals() {
