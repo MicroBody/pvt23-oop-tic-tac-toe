@@ -82,7 +82,6 @@ export default class App {
     `;
   }
 
-
   setPlayAgainGlobals() {
     // play again 
     globalThis.playAgain = async () => {
