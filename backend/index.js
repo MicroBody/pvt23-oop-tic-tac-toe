@@ -1,4 +1,5 @@
 // Serve the production build from the dist folder
+// - no need to use during development!
 import express from 'express';
 import path from 'path';
 import { fileURLToPath } from 'url';
