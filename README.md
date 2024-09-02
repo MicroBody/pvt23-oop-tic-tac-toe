@@ -1,9 +1,8 @@
-# Installera depedencies
-Innan du kan köra det här exemplet, skriv följande i din terminal:
+# TIC-TAC-TOE WITH GUI (written in JS with OOP)
 
-npm install
+* Based on Vite:s Vanilla JavaScript template
+* Added npm start script in package.json for running vite (as an alternative to npm run dev).
+* Images are found in public/images
 
-# Kör exemplet
-Kör från terminalen:
-
-node index
+1. Run npm install to install vite.
+2. Run npm start to start the app.
