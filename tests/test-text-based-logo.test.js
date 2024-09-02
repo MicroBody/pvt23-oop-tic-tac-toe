@@ -14,4 +14,4 @@ test('Does the logo/headline have the text "Tic-Tac-Toe" ?', () => {
   // check that the h1 contains the text 'Tic-Tac-Toe';
   let h1 = document.body.querySelector('h1');
   expect(h1.innerText).toEqual('Tic-Tac-Toe');
-})
+});
