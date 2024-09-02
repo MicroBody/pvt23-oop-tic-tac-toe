@@ -2,20 +2,6 @@ import { expect, test } from 'vitest';
 import { Window } from "happy-dom";
 import App from '../classes/App.js';
 
-/*const browser = new Browser({ url: 'http://localhost:5173' });
-const page = browser.newPage();
-const url = 'http://localhost:5173';
-const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
-
-test('Do the logo/headline read Connect 4 ?', async () => {
-  await page.goto(url);
-  await page.waitUntilComplete();
-  await sleep(1000);
-  let logoHtml = page.mainFrame.document.body.innerHTML;
-  console.log(logoHtml)
-})
-*/
-
 test('Does the logo/headline have the text "Tic-Tac-Toe" ?', () => {
   // create a mocked browser window and get its document
   const document = new Window().document;
