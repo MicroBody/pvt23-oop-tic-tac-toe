@@ -1,7 +1,7 @@
 import { Window } from 'happy-dom';
 import fs from 'fs';
 
-const bodyInitialContent = fs.readFileSync('index.html');
+const bodyInitialContent = fs.readFileSync('index.html', 'utf-8');
 
 export default function getDocument() {
   // create a mocked browser window and get its document
