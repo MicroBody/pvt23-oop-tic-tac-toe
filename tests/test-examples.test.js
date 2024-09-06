@@ -38,8 +38,12 @@ test('Check that player names are registrered correctly', async () => {
 
 test('Make the first two moves and check they are appear on the board', async () => {
   let body = await registerPlayers();
+  // click the position/cell in the middle of the board (cell 5);
   click(body.querySelector('.cell:nth-child(5)'));
+  // check that X is added to the cell we just clicked
   expect(body.querySelector('.cell:nth-child(5)').classList.contains('X')).toBeTruthy();
+  // click the cell to the left of the middle cell (cell 4)
   click(body.querySelector('.cell:nth-child(4)'));
+  // check that O is added to the cell we just clicked
   expect(body.querySelector('.cell:nth-child(4)').classList.contains('O')).toBeTruthy();
 });
