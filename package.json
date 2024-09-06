@@ -1,16 +1,17 @@
 {
-  "name": "oop-tic-tac-toe",
-  "version": "1.0.0",
+  "name": "pvt23-oop-tic-tac-toe",
+  "private": true,
+  "version": "0.0.0",
   "type": "module",
-  "description": "",
-  "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "vite",
+    "test": "vitest",
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "dependencies": {
-    "prompt-sync": "^4.2.0"
+  "devDependencies": {
+    "vite": "^5.4.1",
+    "vitest": "^2.0.5"
   }
 }

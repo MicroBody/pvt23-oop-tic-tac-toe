@@ -6,4 +6,4 @@ npm install
 # Kör exemplet
 Kör från terminalen:
 
-node index
+npm start
