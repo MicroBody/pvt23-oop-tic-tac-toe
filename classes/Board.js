@@ -1,9 +1,12 @@
+import Cell from './Cell.js';
+
 export default class Board {
 
   constructor(app) {
     this.app = app;
-    this.matrix = [...new Array(3)].map(row =>
-      [...new Array(3)].map(column => ' ')
+    this.matrix = [...new Array(3)].map((row, rowIndex) =>
+      [...new Array(3)].map((column, columnIndex) =>
+        new Cell(rowIndex, columnIndex))
     );
     // currentPlayer, whose turn is it?
     this.currentPlayerColor = 'X';
@@ -56,10 +59,10 @@ export default class Board {
     // check that the column is between 0 and 2 - otherwise don't make the move
     if (column < 0 || column >= this.matrix[0].length) { return false; }
     // check that the position is empty - otherwise don't make the move
-    if (this.matrix[row][column] !== ' ') { return false; }
+    if (this.matrix[row][column].color !== ' ') { return false; }
 
     // make the move
-    this.matrix[row][column] = color;
+    this.matrix[row][column].color = color;
     // check if someone has won or if it's a draw/tie and update properties
     this.winner = this.winCheck();
     this.isADraw = this.drawCheck();
@@ -110,7 +113,8 @@ export default class Board {
   // check for a draw/tie
   drawCheck() {
     // if no one has won and no empty positions then it's a draw
-    return !this.winCheck() && !this.matrix.flat().includes(' ');
+    return !this.winCheck() &&
+      !this.matrix.flat().map(cell => cell.color).includes(' ');
   }
 
 }
