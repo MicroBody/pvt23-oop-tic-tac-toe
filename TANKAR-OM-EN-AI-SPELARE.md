@@ -8,5 +8,10 @@
 * Vad är positiv påverkan? Vi ökar våra vinstchanser i en-flera winCombos eller
   blockerar för motståndaren i en-flera winCombos.
 * winCombos som redan har minst en pjäs från motspelaren och minst en pjäs från mig
-  är meninslösa att titta på... de går inte att vinna för någondera spelare.
-
+  är meningslösa att titta på... de går inte att vinna för någondera spelare.
+* Strategi/prioriteringar, för varje "winCombo" vad är "bäst"?
+  * Jag får 3 pjäser - och har vunnit.
+  * Jag blockerar en motståndare som har två pjäser.
+  * Jag blockerar en moståndare som har en pjäs. (Ganska defensivt att prioritera så här högt.)
+  * Jag får två pjäser.
+  * Jag får en pjäs.

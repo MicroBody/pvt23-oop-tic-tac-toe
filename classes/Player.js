@@ -11,7 +11,6 @@ export default class Player {
     this.board = board;
   }
 
-
   async makeBotMove() {
     // a short delay to make the bot seem more 'human'
     // (simulate that it takes time for it to think)
@@ -33,16 +32,53 @@ export default class Player {
   makeSmartBotMove() {
     // orgState - the current state on the board
     let orgState = this.state();
-    // try each legal/possible move
-    console.log("THE CURRENT STATE", orgState);
+    // store scores for each possible move in scores
+    let scores = [];
+    // loop through/try each legal/possible move
     for (let [row, column] of this.legalMoves) {
       let cell = this.board.matrix[row][column];
       cell.color = this.color; // make temporary move
       let futureState = this.state(); // the state if we made this move
       cell.color = ' '; // undo temporary move
-      console.log('IF I MADE THE MOVE', row, column);
-      console.log('THE NEW STATE WOULD BE', futureState);
+      // remember the score for this possible move
+      scores.push({ row, column, score: this.score(orgState, futureState) });
     }
+    scores = shuffleArray(scores).sort((a, b) => a.score > b.score ? -1 : 1);
+    let { row, column } = scores[0];
+    return [row, column];
+  }
+
+  score(orgState, futureState) {
+    // priorities - what is considered the best outcome in each winCombo
+    let priorities = [
+      { me: 3 }, { opp: 2 }, { opp: 1 }, { me: 2 }, { me: 1 }
+    ];
+    // score variable - which we will use to calculate a score
+    let score = 0;
+    // loop through each part of the states, corresponding to a winCombo
+    for (let i = 0; i < orgState.length; i++) {
+      // short aliases for each orgState and futureState part
+      // b - before/orgState, a - after/futureState
+      let b = orgState[i], a = futureState[i];
+      // no change in winCombo - not interesting
+      if (b.me === a.me && b.opp === a.opp) { continue; }
+      // winCombo can't be won be either player (both already have pieces in place)
+      if (b.me > 0 && b.opp > 0) { continue; }
+      // there has been change in this winCombo, so I must have added a piece
+      let partScore = '';
+      // partScore is how good are move is for ONE winCombo
+      // partScore will become number of different priorities x 2 long
+      // initially it is a string, but we will convert to a number before
+      // adding to the total score
+      for (let j = 0; j < priorities.length; j++) {
+        let key = Object.keys(priorities[j])[0];
+        let value = priorities[j][key];
+        if (a[key] === value) { partScore += '01'; }
+        else { partScore += '00'; }
+      }
+      score += +partScore;
+    }
+    return score;
   }
 
   get legalMoves() {

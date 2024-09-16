@@ -15,6 +15,10 @@ export default class App {
     if (playerX && playerO) {
       this.playerX = playerX;
       this.playerO = playerO;
+      // update players so that they know about the new borard
+      this.playerX.board = this.board;
+      this.playerO.board = this.board;
+      // start the new game
       this.namesEntered = true;
       this.board.initiateBotMove();
     }

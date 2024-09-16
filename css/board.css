@@ -97,6 +97,14 @@ body[gameInProgress="true"] {
 
 }
 
+body.botPlaying .cell {
+  cursor: default !important;
+}
+
+body.botPlaying .cell:hover::before {
+  content: '' !important;
+}
+
 /* show the winning combo, with a blinking animation */
 
 .cell.in-win::before {
