@@ -40,6 +40,10 @@ export default class App {
     this.namesEntered = true;
     this.render();
     this.board.initiateBotMove();
+
+    // make players global for debugging
+    globalThis.playerX = this.playerX;
+    globalThis.playerO = this.playerO;
   }
 
   namePossesive(name) {
