@@ -25,7 +25,7 @@ export default class Board {
     // makeMove and if makeMove returns true
     // then call the app render method
     globalThis.makeMoveOnClick = (row, column) =>
-      this.makeMove(this.currentPlayerColor, row, column)
+      this.makeMove(this.currentPlayerColor, row, column, true)
       && this.app.render();
 
     // set some statuses as attributes to the body
@@ -50,7 +50,10 @@ export default class Board {
     </div>`;
   }
 
-  makeMove(color, row, column) {
+  makeMove(color, row, column, fromClick) {
+    let player = color === 'X' ? this.app.playerX : this.app.playerO;
+    // don't allow move fromCLick if it's a bots turn to play
+    if (fromClick && player.type !== 'Human') { return; }
     // don't make any move if the game is over
     if (this.gameOver) { return false; }
     // check that the color is X or O - otherwise don't make the move
@@ -76,6 +79,8 @@ export default class Board {
     // change the current player color, if the game is not over
     !this.gameOver
       && (this.currentPlayerColor = this.currentPlayerColor === 'X' ? 'O' : 'X');
+    // make bot move if the next player is a bot
+    this.initiateBotMove();
     // return true if the move could be made
     return true;
   }
@@ -89,6 +94,17 @@ export default class Board {
     // if no one has won and no empty positions then it's a draw
     return !this.winCheck() &&
       !this.matrix.flat().map(cell => cell.color).includes(' ');
+  }
+
+  // note: this does nothing if the player is a human
+  async initiateBotMove() {
+    // get the current player
+    let player = this.currentPlayerColor === 'X' ? this.app.playerX : this.app.playerO;
+    // if the game isn't over and the player exists and the player is non-human / a bot
+    if (!this.gameOver && player && player.type !== 'Human') {
+      await player.makeBotMove();
+      this.app.render();
+    }
   }
 
 }

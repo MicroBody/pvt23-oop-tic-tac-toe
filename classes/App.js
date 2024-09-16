@@ -11,26 +11,35 @@ export default class App {
     this.board.currentPlayerColor = whoStarts;
     this.whoStarts = whoStarts;
     this.setPlayAgainGlobals();
+    // replay with existing player
     if (playerX && playerO) {
       this.playerX = playerX;
       this.playerO = playerO;
       this.namesEntered = true;
+      this.board.initiateBotMove();
     }
-    else { this.askForNames(); }
+    // enter new players
+    else { this.askForNamesAndTypes(); }
     this.render();
   }
 
-  async askForNames(color = 'X') {
+  async askForNamesAndTypes(color = 'X') {
     const okName = name => name.match(/[a-zåäöA-ZÅÄÖ]{2,}/);
     let playerName = '';
+    let playerType = '';
     while (!okName(playerName)) {
       playerName = await this.dialog.ask(`Enter the name of player ${color}:`);
       await sleep(500);
+      playerType = await this.dialog.ask(
+        `Which type of player is ${playerName}?`,
+        ['Human', 'A dumb bot', 'A smart bot']
+      )
     }
-    this['player' + color] = new Player(playerName, color);
-    if (color === 'X') { this.askForNames('O'); return; }
+    this['player' + color] = new Player(playerName, playerType, color, this.board);
+    if (color === 'X') { this.askForNamesAndTypes('O'); return; }
     this.namesEntered = true;
     this.render();
+    this.board.initiateBotMove();
   }
 
   namePossesive(name) {
