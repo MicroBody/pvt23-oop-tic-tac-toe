@@ -78,6 +78,14 @@ export default class Player {
       }
       score += +partScore;
     }
+
+    // (the scoreing works well in Tic-Tac-Toe
+    // but in Connect 4 it misses that what it considers the best move (highest score)
+    // will sometimes give the opponent an opportunity to win by playing the same column
+    // (ie. directly "above") the chosen move
+    // you can avoid this by trying to play an opponent move in the same column
+    // and if that gives a win set score to negative - 1)
+
     return score;
   }
 
