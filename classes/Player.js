@@ -37,7 +37,7 @@ export default class Player {
     console.log("THE CURRENT STATE", orgState);
     for (let [row, column] of this.legalMoves) {
       let cell = this.board.matrix[row][column];
-      cell.color = this.color; // make tempory move
+      cell.color = this.color; // make temporary move
       let futureState = this.state(); // the state if we made this move
       cell.color = ' '; // undo temporary move
       console.log('IF I MADE THE MOVE', row, column);
