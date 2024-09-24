@@ -77,7 +77,7 @@
 }
 
 /* show which cells that are clickable */
-body[gameInProgress="true"] {
+body[gameInProgress="true"]:not(.botPlaying) {
 
   .cell:not(.X, .O) {
     cursor: pointer;
@@ -95,14 +95,6 @@ body[gameInProgress="true"] {
     opacity: 0.5;
   }
 
-}
-
-body.botPlaying .cell {
-  cursor: default !important;
-}
-
-body.botPlaying .cell:hover::before {
-  content: '' !important;
 }
 
 /* show the winning combo, with a blinking animation */
