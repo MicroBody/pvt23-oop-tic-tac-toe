@@ -7,11 +7,12 @@ import generateCode from './helpers/generateCode.js';
 
 export default class App {
 
-  constructor(playerX, playerO, whoStarts = 'X', networkPlay = false) {
+  constructor(playerX, playerO, whoStarts = 'X', networkPlay = false, networkRole, myColor) {
 
     // network related properties
     this.networkPlay = networkPlay;
-    this.networkRole = null; // is set in the askIfNetworkPlay method
+    this.networkRole = networkRole // is set in the askIfNetworkPlay method
+    this.myColor = myColor;
     this.allowBotsInNetworkPlay = false; // for future development (tournaments between bots
 
     this.dialog = new Dialog();
@@ -29,6 +30,11 @@ export default class App {
       // start the new game
       this.namesEntered = true;
       this.board.initiateBotMove();
+      // if network play, then replace the listener 
+      // (that belongs to the old app / game) with a new one
+      if (networkPlay) {
+        Network.replaceListener(obj => this.networkListener(obj));
+      }
     }
     // enter new players
     else { this.askForNamesAndTypes(); }
@@ -52,7 +58,8 @@ export default class App {
       let extra = '';
       while (!this.bothNetworkPlayersHasJoined) {
         await this.dialog.ask(
-          `Send the following join code to your friend:<br>${code}${extra}`, ['OK']);
+          `Send the following join code to your friend:<br>
+          <input type="text" name="joinCode" readonly value="${code}">${extra}`, ['OK']);
         extra = '<br>Waiting for your friend to join...'
         await sleep(500);
       }
@@ -90,15 +97,23 @@ export default class App {
     }
 
     // remove dialog/modal for primary player when the second player has joined
-    if (this.networkRole === 'primary' && this.bothNetworkPlayersHasJoined) {
+    if (this.networkRole === 'primary'
+      && this.bothNetworkPlayersHasJoined
+      && document.querySelector('dialog input[name="joinCode"]')
+    ) {
       let okButton = document.querySelector('dialog .button.OK');
       okButton && okButton.click();
     }
 
     // make move sent to us from opponent via the network
-    if (data.networkRole) {
+    if (data.networkRole && data.color) {
       let { color, row, column } = data;
       this.board.makeMove(color, row, column, false) && this.render();
+    }
+
+    // if playAgain sent to subordinate from primary then play again
+    if (this.networkRole === 'subordinate' && data.action === 'playAgain') {
+      globalThis.playAgain();
     }
   }
 
@@ -168,6 +183,9 @@ export default class App {
   renderQuitButton() {
     if (!this.namesEntered) { return ''; }
 
+    // don't show button for the joining player during network play
+    if (this.networkPlay && this.networkRole === "subordinate") { return ''; }
+
     globalThis.quitGame = async () => {
       let answer = await this.dialog.ask(
         'What do you want to do?',
@@ -188,15 +206,24 @@ export default class App {
     // play again 
     globalThis.playAgain = async () => {
       let playerToStart = this.whoStarts === 'X' ? this.playerO : this.playerX;
+      // if primary network player send 'playAgain' to subordinate player
+      if (this.networkPlay && this.networkRole === 'primary') {
+        Network.send({ action: 'playAgain' });
+      }
       await this.dialog.ask(
         `It's ${this.namePossesive(playerToStart.name)} turn to start!`, ['OK']);
-      new App(this.playerX, this.playerO, playerToStart.color);
+      new App(this.playerX, this.playerO, playerToStart.color,
+        this.networkPlay, this.networkRole, this.myColor);
     }
     // start a-fresh with new players
     globalThis.newPlayers = () => new App();
   }
 
   renderPlayAgainButtons() {
+
+    // don't show buttons for the joining player during network play
+    if (this.networkPlay && this.networkRole === "subordinate") { return ''; }
+
     // why not use the button element? 
     // div tags are easier to style in a cross-browser-compatible way
     return /*html*/`

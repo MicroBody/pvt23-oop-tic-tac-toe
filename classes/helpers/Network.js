@@ -1,9 +1,11 @@
 let urlPrefix = 'https://sse.nodehill.com';
-let token;
+let token, listener;
 
 export default class Network {
 
-  static startConnection(_user, _channel, listener) {
+  static startConnection(_user, _channel, _listener) {
+
+    listener = _listener;
 
     const user = _user, channel = _channel;
 
@@ -20,6 +22,10 @@ export default class Network {
     eventSource.onerror = error => {
       eventSource.close();
     }
+  }
+
+  static replaceListener(_listener) {
+    listener = _listener;
   }
 
   static async send(message) {
