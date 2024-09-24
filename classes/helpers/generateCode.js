@@ -1,3 +1,4 @@
+// generate a random code with three capital letters followed by three digits
 export default function generateCode() {
   let alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
   let code = '';
