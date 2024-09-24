@@ -1,11 +1,19 @@
 import Dialog from './Dialog.js';
 import Board from './Board.js';
 import Player from './Player.js';
+import Network from './helpers/Network.js';
 import sleep from './helpers/sleep.js';
+import generateCode from './helpers/generateCode.js';
 
 export default class App {
 
-  constructor(playerX, playerO, whoStarts = 'X') {
+  constructor(playerX, playerO, whoStarts = 'X', networkPlay = false) {
+
+    // network related properties
+    this.networkPlay = networkPlay;
+    this.networkRole = null; // is set in the askIfNetworkPlay method
+    this.allowBotsInNetworkPlay = false; // for future development (tournaments between bots
+
     this.dialog = new Dialog();
     this.board = new Board(this);
     this.board.currentPlayerColor = whoStarts;
@@ -27,27 +35,97 @@ export default class App {
     this.render();
   }
 
+  async askIfNetworkPlay() {
+    this.networkPlay = (await this.dialog.ask(
+      `Network Play: Do you want to play<br>against a friend via the Internet?`, ['Yes', 'No'])) === 'Yes';
+    await sleep(500);
+    if (!this.networkPlay) { return; }
+    let startNetworkPlay = (await this.dialog.ask(
+      'Do you want to create a new network game? Or join one?', ['Create', 'Join'])) === 'Create';
+    await sleep(500);
+    let name = await this.dialog.ask('Enter your name:');
+    await sleep(500);
+    if (startNetworkPlay) {
+      this.networkRole = 'primary';
+      let code = generateCode();
+      Network.startConnection(name, code, obj => this.networkListener(obj));
+      let extra = '';
+      while (!this.bothNetworkPlayersHasJoined) {
+        await this.dialog.ask(
+          `Send the following join code to your friend:<br>${code}${extra}`, ['OK']);
+        extra = '<br>Waiting for your friend to join...'
+        await sleep(500);
+      }
+    }
+    else {
+      this.networkRole = 'subordinate';
+      let extra = '';
+      while (!this.bothNetworkPlayersHasJoined) {
+        let code = await this.dialog.ask(`Enter a the join code you got from your friend:${extra}`);
+        this.joiners = [];
+        this.enteredJoinCode = code;
+        Network.startConnection(name, code, obj => this.networkListener(obj));
+        extra = '<br>Incorrect join code... Try again...';
+        await sleep(500);
+      }
+    }
+    // create players
+    this.playerX = new Player(this.joiners.shift(), 'Human', 'X', this.board);
+    this.playerO = new Player(this.joiners.shift(), 'Human', 'O', this.board);
+    this.myColor = this.networkRole === 'primary' ? 'X' : 'O';
+    this.namesEntered = true;
+    this.render();
+  }
+
+  networkListener({ user, timestamp, data }) {
+    // keep this console.log until you understand how 
+    // and which network messages are sent
+    console.log(user, timestamp, data);
+
+    // wait for both players to join
+    this.joiners = this.joiners || [];
+    if (user === 'system' && data.includes('joined channel')) {
+      this.joiners.push(data.split(' ')[1]);
+      this.bothNetworkPlayersHasJoined = this.joiners.length >= 2;
+    }
+
+    // remove dialog/modal for primary player when the second player has joined
+    if (this.networkRole === 'primary' && this.bothNetworkPlayersHasJoined) {
+      let okButton = document.querySelector('dialog .button.OK');
+      okButton && okButton.click();
+    }
+
+    // make move sent to us from opponent via the network
+    if (data.networkRole) {
+      let { color, row, column } = data;
+      this.board.makeMove(color, row, column, false) && this.render();
+    }
+  }
+
   async askForNamesAndTypes(color = 'X') {
+    color === 'X' && await this.askIfNetworkPlay();
+    if (this.networkPlay) { return; }
     const okName = name => name.match(/[a-zåäöA-ZÅÄÖ]{2,}/);
     let playerName = '';
     let playerType = '';
     while (!okName(playerName)) {
       playerName = await this.dialog.ask(`Enter the name of player ${color}:`);
-      await sleep(500);
-      playerType = await this.dialog.ask(
-        `Which type of player is ${playerName}?`,
-        ['Human', 'A dumb bot', 'A smart bot']
-      )
+      if (!this.networkPlay || this.allowBotsInNetworkPlay) {
+        await sleep(500);
+        playerType = await this.dialog.ask(
+          `Which type of player is ${playerName}?`,
+          ['Human', 'A dumb bot', 'A smart bot']
+        )
+      }
+      else {
+        playerType = 'Human';
+      }
     }
     this['player' + color] = new Player(playerName, playerType, color, this.board);
-    if (color === 'X') { this.askForNamesAndTypes('O'); return; }
+    if (color === 'X' && !this.networkPlay) { this.askForNamesAndTypes('O'); return; }
     this.namesEntered = true;
     this.render();
     this.board.initiateBotMove();
-
-    // make players global for debugging
-    globalThis.playerX = this.playerX;
-    globalThis.playerO = this.playerO;
   }
 
   namePossesive(name) {
@@ -78,6 +156,13 @@ export default class App {
         this.renderPlayAgainButtons()}
       </div>
     `;
+
+    if (this.networkPlay && this.myColor !== this.board.currentPlayerColor) {
+      document.body.classList.add('notMyTurn');
+    }
+    else {
+      document.body.classList.remove('notMyTurn');
+    }
   }
 
   renderQuitButton() {

@@ -1,5 +1,6 @@
 import Cell from './Cell.js';
 import WinChecker from './WinChecker.js';
+import Network from './helpers/Network.js';
 
 export default class Board {
 
@@ -52,8 +53,12 @@ export default class Board {
 
   makeMove(color, row, column, fromClick) {
     let player = color === 'X' ? this.app.playerX : this.app.playerO;
+    // don't allow move fromClick if it's network play and not myColor
+    if (fromClick && this.app.networkPlay && color !== this.app.myColor) {
+      return false;
+    }
     // don't allow move fromCLick if it's a bots turn to play
-    if (fromClick && player.type !== 'Human') { return; }
+    if (fromClick && player.type !== 'Human') { return false; }
     // don't make any move if the game is over
     if (this.gameOver) { return false; }
     // check that the color is X or O - otherwise don't make the move
@@ -81,6 +86,11 @@ export default class Board {
       && (this.currentPlayerColor = this.currentPlayerColor === 'X' ? 'O' : 'X');
     // make bot move if the next player is a bot
     this.initiateBotMove();
+
+    // if network play then send the move
+    this.app.networkPlay &&
+      Network.send({ color, row, column, networkRole: this.app.networkRole });
+
     // return true if the move could be made
     return true;
   }
@@ -102,10 +112,10 @@ export default class Board {
     let player = this.currentPlayerColor === 'X' ? this.app.playerX : this.app.playerO;
     // if the game isn't over and the player exists and the player is non-human / a bot
     if (!this.gameOver && player && player.type !== 'Human') {
-      setTimeout(() => document.body.classList.add('botPlaying'), 1);
+      setTimeout(() => document.body.classList.add('notMyTurn'), 1);
       await player.makeBotMove();
       this.app.render();
-      document.body.classList.remove('botPlaying');
+      document.body.classList.remove('notMyTurn');
     }
   }
 
