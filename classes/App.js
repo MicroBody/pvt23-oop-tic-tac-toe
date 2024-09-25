@@ -210,8 +210,6 @@ export default class App {
       if (this.networkPlay && this.networkRole === 'primary') {
         Network.send({ action: 'playAgain' });
       }
-      await this.dialog.ask(
-        `It's ${this.namePossesive(playerToStart.name)} turn to start!`, ['OK']);
       new App(this.playerX, this.playerO, playerToStart.color,
         this.networkPlay, this.networkRole, this.myColor);
     }
