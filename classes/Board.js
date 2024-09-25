@@ -84,7 +84,7 @@ export default class Board {
 
     // if network play then send the move
     this.app.networkPlay && this.app.myColor === color &&
-      Network.send({ color, row, column, networkRole: this.app.networkRole });
+      Network.send({ color, row, column });
 
     // change the current player color, if the game is not over
     !this.gameOver
