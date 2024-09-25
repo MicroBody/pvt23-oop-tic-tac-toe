@@ -81,15 +81,16 @@ export default class Board {
     this.isADraw = this.drawCheck();
     // the game is over if someone has won or if it's a draw
     this.gameOver = this.winner || this.isADraw;
+
+    // if network play then send the move
+    this.app.networkPlay && this.app.myColor === color &&
+      Network.send({ color, row, column, networkRole: this.app.networkRole });
+
     // change the current player color, if the game is not over
     !this.gameOver
       && (this.currentPlayerColor = this.currentPlayerColor === 'X' ? 'O' : 'X');
     // make bot move if the next player is a bot
     this.initiateBotMove();
-
-    // if network play then send the move
-    this.app.networkPlay &&
-      Network.send({ color, row, column, networkRole: this.app.networkRole });
 
     // return true if the move could be made
     return true;

@@ -106,7 +106,7 @@ export default class App {
     }
 
     // make move sent to us from opponent via the network
-    if (data.networkRole && data.color) {
+    if (data.networkRole && data.color && data.color !== this.myColor) {
       let { color, row, column } = data;
       this.board.makeMove(color, row, column, false) && this.render();
     }
