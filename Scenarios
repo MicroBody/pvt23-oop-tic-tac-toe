@@ -1,0 +1,31 @@
+Feature: Playing a game of tic-tac-toe
+
+  Scenario: Starting a new game
+    Given the game board is empty
+    When a new game is started
+    Then the board should be reset with all empty cells
+
+  Scenario: Making a valid move
+    Given the game board has empty cells
+    When a player makes a valid move
+    Then the board should reflect the player's move
+
+  Scenario: Trying to make an invalid move
+    Given the game board has certain cells marked
+    When a player tries to make an invalid move
+    Then the game should reject the move and prompt for a valid move
+
+  Scenario: Winning the game
+    Given the game board has a winning combination
+    When a player marks the winning cells
+    Then the game should declare the player as the winner
+
+  Scenario: Ending the game in a draw
+    Given the game board is full with no winning combination
+    When all cells are marked
+    Then the game should declare a draw
+
+  Scenario: Playing again after the game is over
+    Given the game has ended with a winner or draw
+    When the players choose to play again
+    Then the game should reset for a new round of play
